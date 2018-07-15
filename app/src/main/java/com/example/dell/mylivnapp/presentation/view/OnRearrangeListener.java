@@ -1,4 +1,4 @@
-package com.example.dell.mylivnapp;
+package com.example.dell.mylivnapp.presentation.view;
 
 public interface OnRearrangeListener {
 	

@@ -1,4 +1,4 @@
-package com.example.dell.mylivnapp;
+package com.example.dell.mylivnapp.presentation.view;
 
 import java.util.Collections;
 import java.util.ArrayList;
@@ -6,15 +6,9 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;

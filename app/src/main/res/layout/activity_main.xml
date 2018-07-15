@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".presentation.view.MainActivity">
 
     <!--<GridView-->
         <!--android:id="@+id/gridView"-->
@@ -16,11 +16,11 @@
         <!--app:layout_constraintStart_toStartOf="parent"-->
         <!--app:layout_constraintTop_toTopOf="parent" />-->
 
-    <com.example.dell.mylivnapp.DraggableGridView
+    <com.example.dell.mylivnapp.presentation.view.DraggableGridView
         android:id="@+id/dgv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"></com.example.dell.mylivnapp.DraggableGridView>\
+        android:layout_alignParentTop="true"></com.example.dell.mylivnapp.presentation.view.DraggableGridView>\
 
 </RelativeLayout>
