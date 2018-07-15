@@ -19,6 +19,6 @@ public class ItemsViewModel extends ViewModel {
 
     private List<Item> loadItems() {
         // do something to load users
-        return AppApplication.homeScreenInteractor.getItemList();
+        return AppApplication.homeScreenInteractorImpl.getItemList();
     }
 }

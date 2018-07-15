@@ -1,6 +1,8 @@
 package com.example.dell.mylivnapp.presentation.viewmodel;
 
 
+import com.example.dell.mylivnapp.data.model.Item;
+
 import java.util.List;
 
 import static com.example.dell.mylivnapp.presentation.viewmodel.Status.ERROR;

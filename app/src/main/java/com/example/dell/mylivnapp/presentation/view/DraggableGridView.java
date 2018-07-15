@@ -2,6 +2,7 @@ package com.example.dell.mylivnapp.presentation.view;
 
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 import android.app.Activity;
@@ -23,6 +24,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 
+import com.example.dell.mylivnapp.data.cachemodule.PrefUtils;
+import com.example.dell.mylivnapp.data.model.Item;
+
 
 public class DraggableGridView extends ViewGroup implements View.OnTouchListener, View.OnClickListener, View.OnLongClickListener {
     //layout vars
@@ -40,6 +44,7 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
     protected OnRearrangeListener onRearrangeListener;
     protected OnClickListener secondaryOnClickListener;
     private OnItemClickListener onItemClickListener;
+    private Context context;
 
     //CONSTRUCTOR AND HELPERS
     public DraggableGridView(Context context, AttributeSet attrs) {
@@ -52,6 +57,7 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
         DisplayMetrics metrics = new DisplayMetrics();
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
         dpi = metrics.densityDpi;
+        this.context = context;
     }
 
     protected void setListeners() {
@@ -140,18 +146,19 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
         return i;
     }
 
-    int currentX=0;
-    int currentY=0;
+    int currentX = 0;
+    int currentY = 0;
+
     public int getIndexFromCoor(int x, int y) {
-        currentX=x;
-        currentY=y;
+        currentX = x;
+        currentY = y;
         int col = getColOrRowFromCoor(x), row = getColOrRowFromCoor(y + scroll);
         if (col == -1 || row == -1) //touch is between columns or rows
             return -1;
         int index = row * colCount + col;
         if (index >= getChildCount() + 5)
             return -1;
-        Log.d("indexMapping", "index: "+index+"  X:"+x+" y: " +y);
+        Log.d("indexMapping", "index: " + index + "  X:" + x + " y: " + y);
 
         switch (index) {
             case 0:
@@ -212,7 +219,7 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
         int leftPos = getIndexFromCoor(x - (childSize / 4), y);
         int rightPos = getIndexFromCoor(x + (childSize / 4), y);
 
-        Log.d("target", "leftPos::rightPos" + leftPos+"::"+rightPos);
+        Log.d("target", "leftPos::rightPos" + leftPos + "::" + rightPos);
         if (leftPos == -1 && rightPos == -1) //touch is in the middle of nowhere
             return -1;
         if (leftPos == rightPos) //touch is in the middle of a visual
@@ -223,22 +230,22 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
             target = rightPos;
         else if (leftPos > -1)
             target = leftPos + 1;
-        Log.d("target", "dragged < target" + dragged+"::"+target);
+        Log.d("target", "dragged < target" + dragged + "::" + target);
         if (dragged < target)
             return target - 1;
         Log.d("target", "targetBefore" + target);
         //Toast.makeText(getContext(), "Target: " + target + ".", Toast.LENGTH_SHORT).show();
 
-                for (int i = 3, j = 5; i < 30; i = i + 6, j = j + 6) {
-                    if (i == target) {
-                        target = (target + 2 - 3);
+        for (int i = 3, j = 5; i < 30; i = i + 6, j = j + 6) {
+            if (i == target) {
+                target = (target + 2 - 3);
 
-                    }
-                    if (j == target) {
-                        target = target - 2 ;
+            }
+            if (j == target) {
+                target = target - 2;
 
-                    }
-                }
+            }
+        }
 
         Log.d("target", "target" + target);
         return target;
@@ -362,15 +369,26 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
                     y = (int) event.getY();
                     int l = x - (3 * childSize / 4), t = y - (3 * childSize / 4);
 
-                    if (getChildAt(dragged) != null)
-                        getChildAt(dragged).layout(l, t, l + (childSize * 3 / 2), t + (childSize * 3 / 2));
+                    if (getChildAt(dragged) != null) {
 
-                    //check for new target hover
-                    int target = getTargetFromCoor(x, y);
-                    if (lastTarget != target) {
-                        if (target != -1) {
-                            animateGap(target);
-                            lastTarget = target;
+                        if (getChildAt(dragged).getTag() != null && getChildAt(dragged).getTag().equals("add")) {
+                            scroll += delta;
+                            clampScroll();
+                            if (Math.abs(delta) > 2)
+                                enabled = false;
+                            onLayout(true, getLeft(), getTop(), getRight(), getBottom());
+                        } else {
+                            getChildAt(dragged).layout(l, t, l + (childSize * 3 / 2), t + (childSize * 3 / 2));
+                        }
+                    }
+                    if (getChildAt(dragged).getTag() != null && !getChildAt(dragged).getTag().equals("add")) {
+                        //check for new target hover
+                        int target = getTargetFromCoor(x, y);
+                        if (lastTarget != target) {
+                            if (target != -1) {
+                                animateGap(target);
+                                lastTarget = target;
+                            }
                         }
                     }
                 } else {
@@ -401,7 +419,10 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
 //                            break;
 //                    }
                     View v = getChildAt(dragged);
-                    if (v.getTag()!=null&& v.getTag().equals("add")) { break;}
+                    if (v.getTag() != null && v.getTag().equals("add")) {
+                        lastTarget = -1;
+                        dragged = -1;
+                    }
                     if (lastTarget != -1)
                         reorderChildren();
                     else {
@@ -511,10 +532,20 @@ public class DraggableGridView extends ViewGroup implements View.OnTouchListener
                 Collections.swap(children, dragged, dragged - 1);
                 dragged--;
             }
+        ArrayList arrayList = new ArrayList();
         for (int i = 0; i < children.size(); i++) {
             newPositions.set(i, -1);
             addView(children.get(i));
+            arrayList.add(children.get(i).getTag());
+
         }
+        ArrayList al = new ArrayList();
+        for (Object id : arrayList) {
+            if (!id.equals("add") && !id.equals("dummy"))
+                al.add(MainActivity.hashMap.get(id));
+        }
+        PrefUtils.saveItems(al, context);
+
         onLayout(true, getLeft(), getTop(), getRight(), getBottom());
     }
 
