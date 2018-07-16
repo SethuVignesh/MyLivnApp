@@ -2,6 +2,7 @@ package com.example.dell.mylivnapp.presentation.view;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.dgv)
     DraggableGridView gridView;
     private ItemsViewModel viewModel;
+    MutableLiveData<List<Item>> itemListLiveData;
     List<Item> itemList;
     static HashMap<String, Item> hashMap = new HashMap<>();
 
@@ -52,26 +54,27 @@ public class MainActivity extends AppCompatActivity {
 
         viewModel = ViewModelProviders.of(MainActivity.this).get(ItemsViewModel.class);
 
-        itemList = viewModel.getItemList();
-
-        for (Item item : itemList) {
-            gridView.addView(getImageView(item));
-            hashMap.put(item.getUuid(), item);
-        }
-        addBtnImpl();
-
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (view.getTag() != null && view.getTag().equals("add")) {
-
-
-                    addItem(position);
-                } else {
-
-                    viewClick(view, position);
+        itemListLiveData = viewModel.getItemList();
+        itemListLiveData.observe(this, itemList -> {
+            if (itemList != null)
+                for (Item item : itemList) {
+                    if (item != null) {
+                        gridView.addView(getImageView(item));
+                        hashMap.put(item.getUuid(), item);
+                    }
                 }
-            }
+            addBtnImpl();
+
+            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    if (view.getTag() != null && view.getTag().equals("add")) {
+                        addItem(position);
+                    } else {
+                        viewClick(view, position);
+                    }
+                }
+            });
         });
 
 
@@ -99,12 +102,8 @@ public class MainActivity extends AppCompatActivity {
                 Paint paint = new Paint();
                 paint.setColor(Color.RED);
                 paint.setTextSize(36);
-
             }
-
-
         };
-//        imageView.setTag(item.getUuid());
         Glide.with(this).load(item.getImageUrlString()).into(imageView);
         imageView.setTag(item.getUuid());
         return imageView;
@@ -139,11 +138,13 @@ public class MainActivity extends AppCompatActivity {
                             gridView.removeViewAt(position);
                             gridView.removeViewAt(position);
                             Item item = new Item(System.currentTimeMillis() + "", url);
-                            List arrayList = PrefUtils.getItems(MainActivity.this);
-                            arrayList.add(item);
-                            PrefUtils.saveItems(arrayList, MainActivity.this);
+                            itemList= PrefUtils.getItems(MainActivity.this);
+                            itemList.add(item);
+                            PrefUtils.saveItems(itemList, MainActivity.this);
                             gridView.addView(getImageView(item));
                             addBtnImpl();
+
+
                         }
                     }
                 });
@@ -166,8 +167,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void deleteItem(int position) {
-        Toast.makeText(getApplicationContext(), "Deleted" + position, Toast.LENGTH_SHORT).show();
-
+        itemList = PrefUtils.getItems(MainActivity.this);
         showDeleteAlertDialog(position, "Do you really want to delete the item with identifier " + itemList.get(position).getUuid() + "?", MainActivity.this);
     }
 
@@ -188,26 +188,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void renderLoadingState() {
-//        greetingTextView.setVisibility(View.GONE);
-//        loadingIndicator.setVisibility(View.VISIBLE);
     }
 
     private void renderDataState(List<Item> items) {
-//        loadingIndicator.setVisibility(View.GONE);
-//        greetingTextView.setVisibility(View.VISIBLE);
-//        greetingTextView.setText(greeting);
-
-
-//        for (Item item : items) {
-//            gridView.addView(getView(item.getImageUrlString()));
-//        }
     }
 
     private void renderErrorState(Throwable throwable) {
-//        Timber.e(throwable);
-//        loadingIndicator.setVisibility(View.GONE);
-//        greetingTextView.setVisibility(View.GONE);
-//        Toast.makeText(this, R.string.greeting_error, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -259,6 +245,7 @@ public class MainActivity extends AppCompatActivity {
                         gridView.removeViewAt(position);
                         itemList.remove(position);
                         PrefUtils.saveItems(itemList, MainActivity.this);
+                        Toast.makeText(getApplicationContext(), "Deleted" + position, Toast.LENGTH_SHORT).show();
 
                     }
                 });

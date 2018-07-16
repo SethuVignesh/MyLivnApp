@@ -4,15 +4,20 @@ import android.content.Context;
 
 import com.example.dell.mylivnapp.data.cachemodule.PrefUtils;
 import com.example.dell.mylivnapp.data.model.Item;
+import com.example.dell.mylivnapp.di.DaggerPersistance;
+import com.example.dell.mylivnapp.di.Persistance;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
+import dagger.Module;
 import io.reactivex.Observable;
-
+@Module
 public class RepositoryImpl implements Repository {
     Context context;
+    public Persistance persistance = DaggerPersistance.builder().build();
+
 
     public RepositoryImpl(Context context) {
         this.context = context;
@@ -66,7 +71,7 @@ public class RepositoryImpl implements Repository {
         ArrayList<Item> arrayList = (ArrayList) PrefUtils.getItems(context);
         if (arrayList.contains(item)) {
             arrayList.remove(item);
-            PrefUtils.saveItems(arrayList, context);
+            persistance.getPrefUtils().saveItems(arrayList, context);
             return true;
         }
        return  false;
@@ -78,7 +83,7 @@ public class RepositoryImpl implements Repository {
     }
 
     public List<Item> readFromCache() {
-        return PrefUtils.getItems(context);
+        return persistance.getPrefUtils().getItems(context);
     }
 
     public Observable<List<Item>> readFromCloud() {
@@ -94,13 +99,13 @@ public class RepositoryImpl implements Repository {
     }
 
     public void insertToCache(List<Item> arrayList) {
-        PrefUtils.saveItems(arrayList, context);
+        persistance.getPrefUtils().saveItems(arrayList, context);
     }
 
     public void insertToCache(Item item) {
         ArrayList list = (ArrayList) PrefUtils.getItems(context);
         list.add(item);
-        PrefUtils.saveItems(list, context);
+        persistance.getPrefUtils().saveItems(list, context);
     }
 
 

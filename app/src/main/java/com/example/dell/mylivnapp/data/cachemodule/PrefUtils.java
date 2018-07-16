@@ -12,10 +12,22 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
+
+@Module
+@Singleton
 public class PrefUtils {
 
     private static final String FAV_LIST = "fav";
     public static String PREF_FILE_NAME = "noon_academy_pref";
+@Provides
+    public PrefUtils getPrefUtils() {
+        return new PrefUtils();
+
+    }
 
     public synchronized static void saveItems(List<Item> bookMarked, @NonNull Context context) {
 

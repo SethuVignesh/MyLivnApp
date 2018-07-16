@@ -6,6 +6,8 @@ import com.example.dell.mylivnapp.data.Repository;
 import com.example.dell.mylivnapp.data.RepositoryImpl;
 import com.example.dell.mylivnapp.data.cachemodule.PrefUtils;
 import com.example.dell.mylivnapp.data.model.Item;
+import com.example.dell.mylivnapp.di.DaggerPersistance;
+import com.example.dell.mylivnapp.di.Persistance;
 import com.example.dell.mylivnapp.domain.HomeScreenInteractor;
 import com.example.dell.mylivnapp.domain.HomeScreenInteractorImpl;
 
@@ -14,7 +16,7 @@ import java.util.ArrayList;
 public class AppApplication extends Application {
     public RepositoryImpl repository;
     public static HomeScreenInteractorImpl homeScreenInteractorImpl;
-
+    public Persistance persistance = DaggerPersistance.builder().build();
 
     @Override
     public void onCreate() {
@@ -28,7 +30,8 @@ public class AppApplication extends Application {
     }
 
     private void prepareDummyData() {
-        if (PrefUtils.getItems(getApplicationContext()).size() != 0) return;
+
+        if (persistance.getPrefUtils().getItems(getApplicationContext()).size() != 0) return;
         ArrayList<Item> arrayList = new ArrayList<>();
         //https://raw.githubusercontent.com/SethuVignesh/RecyclerInfiniteScroll/master/app/src/main/res/drawable/zero.png
         Item item = new Item("0", "https://raw.githubusercontent.com/SethuVignesh/RecyclerInfiniteScroll/master/app/src/main/res/drawable/zero.png");
